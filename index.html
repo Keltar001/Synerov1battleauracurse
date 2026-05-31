@@ -62,7 +62,7 @@
             border-radius: 14px;
             padding: 10px;
             width: 100%;
-            max-width: 290px;
+            max-width: 300px; /* Légèrement élargi pour accueillir les nouveaux boutons PV */
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             box-sizing: border-box;
         }
@@ -80,26 +80,30 @@
         }
         .char-name {
             font-weight: 800;
-            font-size: 14px;
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
-        /* MICRO COMPTEUR DE VIE */
+        /* BOÎTE DES PV ÉLARGIE ET OPTIMISÉE */
         .char-hp-box {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px; /* Espace réduit pour tout aligner proprement */
             background: rgba(0,0,0,0.3);
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 8px;
             border: 1px solid rgba(255, 71, 87, 0.2);
         }
         .char-hp-value {
             font-weight: 800;
-            font-size: 15px;
+            font-size: 14px;
             color: #ff4757;
-            min-width: 22px;
+            min-width: 20px;
             text-align: center;
         }
 
@@ -178,7 +182,11 @@
             flex-shrink: 0;
         }
         .btn:active { transform: scale(0.85); }
+        
+        /* Boutons PV miniatures */
         .btn-hp-nano { width: 20px; height: 20px; font-size: 11px; background-color: rgba(255,255,255,0.05); }
+        /* Style spécial plus discret pour les boutons de pallier -5 et +5 */
+        .btn-hp-5 { color: #55657e; font-size: 9px; font-weight: 600; background-color: transparent; }
 
         /* ÉTATS ACTIFS EN JEU */
         .status-item.active-aura {
@@ -232,31 +240,33 @@
 
     <h1>Synero - Battlefield Tracker</h1>
 
+    <!-- SECTION DES 4 HÉROS -->
     <div class="faction-title title-allies">Équipe des Héros</div>
     <div class="battle-row" id="heroes-container"></div>
 
+    <!-- SECTION DES 4 MONSTRES -->
     <div class="faction-title title-enemies">Équipe des Monstres</div>
     <div class="battle-row" id="monsters-container"></div>
 
+    <!-- REINITIALISATION TOTALE -->
     <div class="reset-bar">
         <button class="btn-reset-clear" onclick="resetToutLeChampDeBataille()">Réinitialiser le combat</button>
     </div>
 
     <script>
-        // Liste des 12 statuts mis à jour (5 Auras et 7 Curses)
         const listeStatuts = [
             { id: "fury", type: "aura" },
             { id: "sharp", type: "aura" },
             { id: "bless", type: "aura" },
             { id: "regen", type: "aura" },
-            { id: "fast", type: "aura" }, // Nouvelle Aura
+            { id: "fast", type: "aura" },
             { id: "bleed", type: "curse" },
             { id: "poison", type: "curse" },
             { id: "sanctify", type: "curse" },
             { id: "burn", type: "curse" },
             { id: "chill", type: "curse" },
             { id: "mark", type: "curse" },
-            { id: "slow", type: "curse" }  // Nouvelle Curse
+            { id: "slow", type: "curse" }
         ];
 
         const heros = [
@@ -296,15 +306,18 @@
                 `;
             });
 
+            /* RETOUCHE : AJOUT DES BOUTONS -5 ET +5 DANS L'ALIGNEMENT DES PV */
             return `
                 <div class="char-card ${allianceClass}">
                     <div class="char-header">
                         <span class="char-name">${perso.nom}</span>
                         <div class="char-dash-hp">
                             <div class="char-hp-box">
+                                <button class="btn btn-hp-nano btn-hp-5" onclick="modifierHP('${perso.id}', -5)">-5</button>
                                 <button class="btn btn-hp-nano" onclick="modifierHP('${perso.id}', -1)">-</button>
                                 <span class="char-hp-value" id="hp-${perso.id}">20</span>
                                 <button class="btn btn-hp-nano" onclick="modifierHP('${perso.id}', 1)">+</button>
+                                <button class="btn btn-hp-nano btn-hp-5" onclick="modifierHP('${perso.id}', 5)">+5</button>
                             </div>
                         </div>
                     </div>
