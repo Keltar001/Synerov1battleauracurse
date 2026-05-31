@@ -62,7 +62,7 @@
             border-radius: 14px;
             padding: 10px;
             width: 100%;
-            max-width: 290px; /* Taille optimisée pour en caler 4 côte à côte sur grand écran */
+            max-width: 290px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             box-sizing: border-box;
         }
@@ -106,11 +106,11 @@
         /* GRILLE INTERNE DES 10 STATUTS */
         .char-status-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 colonnes de statuts par fiche */
+            grid-template-columns: repeat(2, 1fr);
             gap: 6px;
         }
 
-        /* STRUCTURE DE LIGNE DE STATUT (PLUS COMPACTE) */
+        /* STRUCTURE DE LIGNE DE STATUT */
         .status-item {
             background: rgba(11, 14, 20, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.03);
@@ -161,7 +161,7 @@
             z-index: 2;
         }
 
-        /* BOUTONS MINIATURES ANTI MISS-CLIC (HITBOX OPTIMISÉE) */
+        /* BOUTONS MINIATURES */
         .btn {
             width: 24px;
             height: 24px;
@@ -180,7 +180,7 @@
         .btn:active { transform: scale(0.85); }
         .btn-hp-nano { width: 20px; height: 20px; font-size: 11px; background-color: rgba(255,255,255,0.05); }
 
-        /* ÉTATS ACTIFS EN JEU (LISELET + ILLUMINATION DE TOUTE LA CASE) */
+        /* ÉTATS ACTIFS EN JEU */
         .status-item.active-aura {
             background: rgba(241, 196, 15, 0.08);
             border-color: #f1c40f;
@@ -246,7 +246,6 @@
     </div>
 
     <script>
-        // Les 10 statuts génériques (4 Auras et 6 Curses)
         const listeStatuts = [
             { id: "fury", type: "aura" },
             { id: "sharp", type: "aura" },
@@ -289,7 +288,7 @@
                     <div class="status-item" id="block-${perso.id}-${st.id}">
                         <button class="btn" onclick="modifier('${perso.id}', '${st.id}', -1)">-</button>
                         <div class="icon-wrapper">
-                            <img src="${st.id}.png" class="status-icon" alt="${st.id}">
+                            <img src="icone/${st.id}.png" class="status-icon" alt="${st.id}">
                             <div class="status-badge" id="val-${perso.id}-${st.id}">0</div>
                         </div>
                         <button class="btn" onclick="modifier('${perso.id}', '${st.id}', 1)">+</button>
@@ -323,11 +322,10 @@
             
             let v = parseInt(badge.innerText) + changement;
             if (v < 0) v = 0;
-            if (v > 20) v = 20; // LIMITE DÉBLOQUÉE À 20 MAXIMUM
+            if (v > 20) v = 20;
 
             badge.innerText = v;
 
-            // Gestion de l'illumination globale de la case
             block.classList.remove('active-aura', 'active-curse');
             if (v > 0) {
                 if (statutDef.type === 'aura') block.classList.add('active-aura');
@@ -350,11 +348,9 @@
             const toutesFiches = [...heros, ...monstres];
             
             toutesFiches.forEach(p => {
-                // Charger PV
                 const sauvHP = localStorage.getItem(`bf_${p.id}_hp`);
                 document.getElementById(`hp-${p.id}`).innerText = sauvHP ? sauvHP : "20";
 
-                // Charger Statuts
                 listeStatuts.forEach(st => {
                     const sauvVal = localStorage.getItem(`bf_${p.id}_${st.id}`);
                     const netVal = sauvVal ? parseInt(sauvVal) : 0;
@@ -375,7 +371,6 @@
 
         function resetToutLeChampDeBataille() {
             if (confirm("Voulez-vous vider entièrement le champ de bataille (Effacer tous les PV et statuts des 8 fiches) ?")) {
-                // On nettoie uniquement les clés liées à ce site (qui commencent par "bf_")
                 Object.keys(localStorage).forEach(key => {
                     if (key.startsWith('bf_')) {
                         localStorage.removeItem(key);
