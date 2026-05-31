@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERO - Table de Combat</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background-color: #0b0e14;
+            background-image: radial-gradient(at 50% 0%, #1a2333 0%, #0b0e14 75%);
+            color: #e2e8f0;
+            margin: 0;
+            padding: 10px;
+            padding-bottom: 90px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00cfc1;
+            margin: 10px 0 20px 0;
+            text-shadow: 0 0 10px rgba(0,207,193,0.3);
+        }
+
+        /* GRANDE SECTION DE FACTION (HEROS / MONSTRES) */
+        .faction-title {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 20px 0 10px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .title-allies { color: #00cfc1; }
+        .title-allies::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #00cfc1; border-radius: 50%; box-shadow: 0 0 8px #00cfc1; }
+        
+        .title-enemies { color: #ff4757; }
+        .title-enemies::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #ff4757; border-radius: 50%; box-shadow: 0 0 8px #ff4757; }
+
+        /* GRILLE ALIGNÉE HORIZONTALEMENT */
+        .battle-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        /* FICHE INDIVIDUELLE DE PERSONNAGE (HEROS OU MONSTRE) */
+        .char-card {
+            background: rgba(20, 27, 41, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 10px;
+            width: 100%;
+            max-width: 290px; /* Taille optimisée pour en caler 4 côte à côte sur grand écran */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+        .char-card.alliance-hero { border-top: 3px solid #00cfc1; }
+        .char-card.alliance-monster { border-top: 3px solid #ff4757; }
+
+        /* ENTÊTE DE FICHE (NOM + PV) */
+        .char-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .char-name {
+            font-weight: 800;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* MICRO COMPTEUR DE VIE */
+        .char-hp-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 71, 87, 0.2);
+        }
+        .char-hp-value {
+            font-weight: 800;
+            font-size: 15px;
+            color: #ff4757;
+            min-width: 22px;
+            text-align: center;
+        }
+
+        /* GRILLE INTERNE DES 10 STATUTS */
+        .char-status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 colonnes de statuts par fiche */
+            gap: 6px;
+        }
+
+        /* STRUCTURE DE LIGNE DE STATUT (PLUS COMPACTE) */
+        .status-item {
+            background: rgba(11, 14, 20, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 3px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        /* CADRE ICÔNE EN MINIATURE */
+        .icon-wrapper {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            background-color: #0b0e14;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+        .status-icon {
+            max-width: 24px;
+            max-height: 24px;
+            object-fit: contain;
+        }
+
+        /* BADGE DES VALEURS — JUSQU'À 20 */
+        .status-badge {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 800;
+            width: 16px;
+            height: 16px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1.5px solid #0b0e14;
+            z-index: 2;
+        }
+
+        /* BOUTONS MINIATURES ANTI MISS-CLIC (HITBOX OPTIMISÉE) */
+        .btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #94a3b8;
+            background-color: #1e293b;
+            flex-shrink: 0;
+        }
+        .btn:active { transform: scale(0.85); }
+        .btn-hp-nano { width: 20px; height: 20px; font-size: 11px; background-color: rgba(255,255,255,0.05); }
+
+        /* ÉTATS ACTIFS EN JEU (LISELET + ILLUMINATION DE TOUTE LA CASE) */
+        .status-item.active-aura {
+            background: rgba(241, 196, 15, 0.08);
+            border-color: #f1c40f;
+            box-shadow: 0 0 8px rgba(241, 196, 15, 0.1);
+        }
+        .status-item.active-aura .icon-wrapper { border-color: #f1c40f; }
+        .status-item.active-aura .status-badge { background: #f1c40f; color: #0b0e14; box-shadow: 0 0 5px rgba(241, 196, 15, 0.5); }
+
+        .status-item.active-curse {
+            background: rgba(192, 132, 252, 0.08);
+            border-color: #c084fc;
+            box-shadow: 0 0 8px rgba(192, 132, 252, 0.1);
+        }
+        .status-item.active-curse .icon-wrapper { border-color: #c084fc; }
+        .status-item.active-curse .status-badge { background: #c084fc; color: #0b0e14; box-shadow: 0 0 5px rgba(192, 132, 252, 0.5); }
+
+        /* BARRE DE REMISE À ZÉRO FIXE */
+        .reset-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(11, 14, 20, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            z-index: 10;
+        }
+        .btn-reset-clear {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .btn-reset-clear:active { opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+    <h1>Synero - Battlefield Tracker</h1>
+
+    <!-- SECTION DES 4 HÉROS -->
+    <div class="faction-title title-allies">Équipe des Héros</div>
+    <div class="battle-row" id="heroes-container"></div>
+
+    <!-- SECTION DES 4 MONSTRES -->
+    <div class="faction-title title-enemies">Équipe des Monstres</div>
+    <div class="battle-row" id="monsters-container"></div>
+
+    <!-- REINITIALISATION TOTALE -->
+    <div class="reset-bar">
+        <button class="btn-reset-clear" onclick="resetToutLeChampDeBataille()">Réinitialiser le combat</button>
+    </div>
+
+    <script>
+        // Les 10 statuts génériques (4 Auras et 6 Curses)
+        const listeStatuts = [
+            { id: "fury", type: "aura" },
+            { id: "sharp", type: "aura" },
+            { id: "bless", type: "aura" },
+            { id: "regen", type: "aura" },
+            { id: "bleed", type: "curse" },
+            { id: "poison", type: "curse" },
+            { id: "sanctify", type: "curse" },
+            { id: "burn", type: "curse" },
+            { id: "chill", type: "curse" },
+            { id: "mark", type: "curse" }
+        ];
+
+        const heros = [
+            { id: "h1", nom: "Héro 1" }, { id: "h2", nom: "Héro 2" },
+            { id: "h3", nom: "Héro 3" }, { id: "h4", nom: "Héro 4" }
+        ];
+
+        const monstres = [
+            { id: "m1", nom: "Monstre 1" }, { id: "m2", nom: "Monstre 2" },
+            { id: "m3", nom: "Monstre 3" }, { id: "m4", nom: "Monstre 4" }
+        ];
+
+        function initialiserTable() {
+            const hContainer = document.getElementById('heroes-container');
+            const mContainer = document.getElementById('monsters-container');
+
+            heros.forEach(h => hContainer.innerHTML += genererFicheHTML(h, false));
+            monstres.forEach(m => mContainer.innerHTML += genererFicheHTML(m, true));
+
+            chargerDonnees();
+        }
+
+        function genererFicheHTML(perso, isMonster) {
+            const allianceClass = isMonster ? 'alliance-monster' : 'alliance-hero';
+            
+            let htmlStatuts = '';
+            listeStatuts.forEach(st => {
+                htmlStatuts += `
+                    <div class="status-item" id="block-${perso.id}-${st.id}">
+                        <button class="btn" onclick="modifier('${perso.id}', '${st.id}', -1)">-</button>
+                        <div class="icon-wrapper">
+                            <img src="${st.id}.png" class="status-icon" alt="${st.id}">
+                            <div class="status-badge" id="val-${perso.id}-${st.id}">0</div>
+                        </div>
+                        <button class="btn" onclick="modifier('${perso.id}', '${st.id}', 1)">+</button>
+                    </div>
+                `;
+            });
+
+            return `
+                <div class="char-card ${allianceClass}">
+                    <div class="char-header">
+                        <span class="char-name">${perso.nom}</span>
+                        <div class="char-dash-hp">
+                            <div class="char-hp-box">
+                                <button class="btn btn-hp-nano" onclick="modifierHP('${perso.id}', -1)">-</button>
+                                <span class="char-hp-value" id="hp-${perso.id}">20</span>
+                                <button class="btn btn-hp-nano" onclick="modifierHP('${perso.id}', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="char-status-grid">
+                        ${htmlStatuts}
+                    </div>
+                </div>
+            `;
+        }
+
+        function modifier(persoId, statutId, changement) {
+            const badge = document.getElementById(`val-${persoId}-${statutId}`);
+            const block = document.getElementById(`block-${persoId}-${statutId}`);
+            const statutDef = listeStatuts.find(s => s.id === statutId);
+            
+            let v = parseInt(badge.innerText) + changement;
+            if (v < 0) v = 0;
+            if (v > 20) v = 20; // LIMITE DÉBLOQUÉE À 20 MAXIMUM
+
+            badge.innerText = v;
+
+            // Gestion de l'illumination globale de la case
+            block.classList.remove('active-aura', 'active-curse');
+            if (v > 0) {
+                if (statutDef.type === 'aura') block.classList.add('active-aura');
+                if (statutDef.type === 'curse') block.classList.add('active-curse');
+            }
+
+            localStorage.setItem(`bf_${persoId}_${statutId}`, v);
+        }
+
+        function modifierHP(persoId, changement) {
+            const hpDisplay = document.getElementById(`hp-${persoId}`);
+            let v = parseInt(hpDisplay.innerText) + changement;
+            if (v < 0) v = 0;
+            
+            hpDisplay.innerText = v;
+            localStorage.setItem(`bf_${persoId}_hp`, v);
+        }
+
+        function chargerDonnees() {
+            const toutesFiches = [...heros, ...monstres];
+            
+            toutesFiches.forEach(p => {
+                // Charger PV
+                const sauvHP = localStorage.getItem(`bf_${p.id}_hp`);
+                document.getElementById(`hp-${p.id}`).innerText = sauvHP ? sauvHP : "20";
+
+                // Charger Statuts
+                listeStatuts.forEach(st => {
+                    const sauvVal = localStorage.getItem(`bf_${p.id}_${st.id}`);
+                    const netVal = sauvVal ? parseInt(sauvVal) : 0;
+                    
+                    const badge = document.getElementById(`val-${p.id}-${st.id}`);
+                    const block = document.getElementById(`block-${p.id}-${st.id}`);
+                    
+                    badge.innerText = netVal;
+                    
+                    block.classList.remove('active-aura', 'active-curse');
+                    if (netVal > 0) {
+                        if (st.type === 'aura') block.classList.add('active-aura');
+                        if (st.type === 'curse') block.classList.add('active-curse');
+                    }
+                });
+            });
+        }
+
+        function resetToutLeChampDeBataille() {
+            if (confirm("Voulez-vous vider entièrement le champ de bataille (Effacer tous les PV et statuts des 8 fiches) ?")) {
+                // On nettoie uniquement les clés liées à ce site (qui commencent par "bf_")
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('bf_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                chargerDonnees();
+            }
+        }
+
+        window.onload = initialiserTable;
+    </script>
+</body>
+</html>
