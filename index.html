@@ -103,7 +103,7 @@
             text-align: center;
         }
 
-        /* GRILLE INTERNE DES 10 STATUTS */
+        /* GRILLE INTERNE DES STATUTS */
         .char-status-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -232,31 +232,31 @@
 
     <h1>Synero - Battlefield Tracker</h1>
 
-    <!-- SECTION DES 4 HÉROS -->
     <div class="faction-title title-allies">Équipe des Héros</div>
     <div class="battle-row" id="heroes-container"></div>
 
-    <!-- SECTION DES 4 MONSTRES -->
     <div class="faction-title title-enemies">Équipe des Monstres</div>
     <div class="battle-row" id="monsters-container"></div>
 
-    <!-- REINITIALISATION TOTALE -->
     <div class="reset-bar">
         <button class="btn-reset-clear" onclick="resetToutLeChampDeBataille()">Réinitialiser le combat</button>
     </div>
 
     <script>
+        // Liste des 12 statuts mis à jour (5 Auras et 7 Curses)
         const listeStatuts = [
             { id: "fury", type: "aura" },
             { id: "sharp", type: "aura" },
             { id: "bless", type: "aura" },
             { id: "regen", type: "aura" },
+            { id: "fast", type: "aura" }, // Nouvelle Aura
             { id: "bleed", type: "curse" },
             { id: "poison", type: "curse" },
             { id: "sanctify", type: "curse" },
             { id: "burn", type: "curse" },
             { id: "chill", type: "curse" },
-            { id: "mark", type: "curse" }
+            { id: "mark", type: "curse" },
+            { id: "slow", type: "curse" }  // Nouvelle Curse
         ];
 
         const heros = [
@@ -362,25 +362,4 @@
                     
                     block.classList.remove('active-aura', 'active-curse');
                     if (netVal > 0) {
-                        if (st.type === 'aura') block.classList.add('active-aura');
-                        if (st.type === 'curse') block.classList.add('active-curse');
-                    }
-                });
-            });
-        }
-
-        function resetToutLeChampDeBataille() {
-            if (confirm("Voulez-vous vider entièrement le champ de bataille (Effacer tous les PV et statuts des 8 fiches) ?")) {
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith('bf_')) {
-                        localStorage.removeItem(key);
-                    }
-                });
-                chargerDonnees();
-            }
-        }
-
-        window.onload = initialiserTable;
-    </script>
-</body>
-</html>
+                        if (st.type === 'aura
