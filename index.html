@@ -362,4 +362,25 @@
                     
                     block.classList.remove('active-aura', 'active-curse');
                     if (netVal > 0) {
-                        if (st.type === 'aura
+                        if (st.type === 'aura') block.classList.add('active-aura');
+                        if (st.type === 'curse') block.classList.add('active-curse');
+                    }
+                });
+            });
+        }
+
+        function resetToutLeChampDeBataille() {
+            if (confirm("Voulez-vous vider entièrement le champ de bataille (Effacer tous les PV et statuts des 8 fiches) ?")) {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('bf_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                chargerDonnees();
+            }
+        }
+
+        window.onload = initialiserTable;
+    </script>
+</body>
+</html>
